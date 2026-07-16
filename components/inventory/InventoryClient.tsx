@@ -6,16 +6,18 @@ import type { InventoryRow, LocationRow } from '@/lib/types';
 import AddStockDialog from './AddStockDialog';
 import RemoveStockDialog from './RemoveStockDialog';
 import TransferStockDialog from './TransferStockDialog';
-import { Plus, Minus, ArrowRightLeft, Search } from 'lucide-react';
+import { Plus, Minus, ArrowRightLeft, Search, PackagePlus } from 'lucide-react';
 
 type ActionKind = 'add' | 'remove' | 'transfer' | null;
 
 export default function InventoryClient({
   initialRows,
   locations,
+  isAdmin,
 }: {
   initialRows: InventoryRow[];
   locations: LocationRow[];
+  isAdmin: boolean;
 }) {
   const [query, setQuery] = useState('');
   const [zone, setZone] = useState<string>('all');
@@ -80,7 +82,15 @@ export default function InventoryClient({
           <input type="checkbox" checked={hideZero} onChange={(e) => setHideZero(e.target.checked)} />
           Hide zero
         </label>
-        <div className="ml-auto">
+        <div className="ml-auto flex gap-2">
+          {isAdmin && (
+            <Link
+              href="/products/new"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white text-slate-800 text-sm px-3 py-2 hover:bg-slate-50"
+            >
+              <PackagePlus className="h-4 w-4" /> New product
+            </Link>
+          )}
           <button
             onClick={() => { setActiveRow(null); setAction('add'); }}
             className="inline-flex items-center gap-1.5 rounded-md bg-slate-900 text-white text-sm px-3 py-2 hover:bg-slate-800"

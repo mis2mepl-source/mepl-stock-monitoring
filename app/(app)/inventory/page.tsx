@@ -6,10 +6,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function InventoryPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: rows }, { data: locations }] = await Promise.all([
+  const [{ data: rows }, { data: locations }, { data: profile }] = await Promise.all([
     supabase.from('v_inventory').select('*').order('mepl_code').order('location_code'),
     supabase.from('locations').select('*').eq('is_active', true).order('code'),
+    supabase.from('profiles').select('role').eq('id', user!.id).maybeSingle(),
   ]);
 
   return (
@@ -21,6 +25,7 @@ export default async function InventoryPage() {
       <InventoryClient
         initialRows={(rows ?? []) as InventoryRow[]}
         locations={(locations ?? []) as LocationRow[]}
+        isAdmin={profile?.role === 'admin'}
       />
     </div>
   );
