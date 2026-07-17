@@ -1,7 +1,15 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { LayoutDashboard, Package, ArrowRightLeft, MapPin, BarChart3, LogOut } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Package,
+  ArrowRightLeft,
+  MapPin,
+  Users,
+  Upload,
+  LogOut,
+} from 'lucide-react';
 import SignOutButton from '@/components/common/SignOutButton';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -15,12 +23,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('id', user.id)
     .maybeSingle();
 
-  const nav = [
-    { href: '/',           label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/inventory',  label: 'Inventory', icon: Package },
-    { href: '/movements',  label: 'Movements', icon: ArrowRightLeft },
-    { href: '/locations',  label: 'Locations', icon: MapPin },
-    { href: '/reports',    label: 'Reports',   icon: BarChart3 },
+  const isAdmin = profile?.role === 'admin';
+
+  const baseNav = [
+    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/inventory', label: 'Inventory', icon: Package },
+    { href: '/movements', label: 'Movements', icon: ArrowRightLeft },
+  ];
+
+  const adminNav = [
+    { href: '/locations', label: 'Locations', icon: MapPin },
+    { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin/import', label: 'Import', icon: Upload },
   ];
 
   return (
@@ -31,7 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="text-xs text-slate-500 mt-0.5">Location-wise inventory</div>
         </div>
         <nav className="flex-1 p-2 space-y-0.5">
-          {nav.map((item) => (
+          {baseNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -41,6 +55,23 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               {item.label}
             </Link>
           ))}
+          {isAdmin && (
+            <>
+              <div className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                Admin
+              </div>
+              {adminNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-slate-700 hover:bg-slate-100"
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              ))}
+            </>
+          )}
         </nav>
         <div className="p-3 border-t border-slate-200 text-xs">
           <div className="font-medium text-slate-700 truncate">{profile?.full_name ?? user.email}</div>
@@ -50,9 +81,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </SignOutButton>
         </div>
       </aside>
-      <main className="flex-1 min-w-0">
-        {children}
-      </main>
+      <main className="flex-1 min-w-0">{children}</main>
     </div>
   );
 }
